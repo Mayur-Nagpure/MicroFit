@@ -1,0 +1,24 @@
+server:
+  port: 8888
+#spring:
+#  cloud:
+#    config:
+#      server:
+#        git:
+#          uri: https://github.com/Mayur-Nagpure/config-server-properties
+#          default-label: master
+#          clone-on-start: true   # Optional: clone repo on server start for faster access
+#          search-paths: .      # Optional: subdirectories inside your repo with config
+
+  #  logging level to help debug on Docker
+logging:
+  level:
+    org.springframework.cloud.config.server: DEBUG
+spring:
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config, file:./config

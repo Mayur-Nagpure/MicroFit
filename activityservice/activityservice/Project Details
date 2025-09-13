@@ -1,0 +1,108 @@
+Client (e.g., frontend or API call)
+   ⬇
+Controller  ➝  Service  ➝  Repository  ➝  Database (MongoDB)
+             ↕           ↕
+           DTOs         Model (Entity)
+
+✅ Roles of Each Piece
+1. 📨 DTOs — ActivityRequest and ActivityResponse
+Where? Used in Controller and Service layers.
+
+Purpose:
+
+Act as data carriers between layers (especially between external clients and your internal system).
+
+Prevent exposing your entity/model (which might contain DB-specific or sensitive data).
+
+Examples:
+
+ActivityRequest: represents input data from the client.
+
+ActivityResponse: represents output data returned to the client.
+
+Used in:
+
+java
+Copy
+Edit
+// In Controller:
+@PostMapping
+public ResponseEntity<ActivityResponse> trackActivity(@RequestBody ActivityRequest request)
+java
+Copy
+Edit
+// In Service:
+public ActivityResponse trackActivity(ActivityRequest request)
+--------------------------------------------------------------------
+2. 🧱 Model (Entity) — Activity
+Where? Used in Service and Repository.
+
+Purpose:
+
+This is the real object stored in the database.
+
+Annotated with @Document, it maps to a MongoDB collection.
+
+Example:
+
+java
+Copy
+Edit
+@Document(collection = "activities")
+public class Activity {
+    @Id
+    private String id;
+    private String userId;
+    ...
+}
+Used in:
+
+java
+Copy
+Edit
+// In Service:
+Activity activity = Activity.builder()
+    .userId(request.getUserId())
+    ...
+    .build();
+java
+Copy
+Edit
+// In Repository:
+activityRepository.save(activity);
+--------------------------------------------------------------------------------
+3. ⚙️ MongoConfig
+Where? It's a Spring configuration class, usually in a config package.
+
+Purpose:
+
+Turns on auditing for MongoDB using:
+
+java
+Copy
+Edit
+@EnableMongoAuditing
+Required if you're using annotations like @CreatedDate and @LastModifiedDate in your model.
+
+Used once, globally, not in the main data flow.
+
+java
+Copy
+Edit
+@Configuration
+@EnableMongoAuditing
+public class MongoConfig {
+}
+🧠 Summary Table
+Component	Type	Layer/Use	Role
+ActivityRequest	DTO	Controller → Service	Input from API call
+ActivityResponse	DTO	Service → Controller → Client	Output sent back to the client
+Activity	Model / Entity	Service ↔ Repository ↔ MongoDB	The actual object stored in the DB
+MongoConfig	Configuration	App configuration	Enables auditing for auto-handling created/updated timestamps
+-----------------------------------------------------------------------------------------------------------------
+
+Client sends JSON ➝ Controller receives and maps to ActivityRequest ➝
+Service builds Activity model from ActivityRequest ➝
+Repository saves Activity ➝
+Service maps saved Activity to ActivityResponse ➝
+Controller returns ActivityResponse to client

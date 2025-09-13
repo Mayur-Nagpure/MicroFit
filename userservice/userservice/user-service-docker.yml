@@ -1,0 +1,23 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+  config:
+    import: "configserver:http://configserver:8080"
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/fitness_user_db
+    username: postgres
+    password: Mayur@1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://servicereg:8761/eureka

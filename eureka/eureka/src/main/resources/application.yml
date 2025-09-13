@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: eureka
+
+server:
+  port: 8761
+
+eureka:
+  instance:
+    hostname: localhost
+    prefer-ip-address: false
+  client:
+    register-with-eureka:   false  #This service will NOT register itself with the Eureka server.
+    fetch-registry: false  #This service will NOT fetch the list of services registered in Eureka.
+
